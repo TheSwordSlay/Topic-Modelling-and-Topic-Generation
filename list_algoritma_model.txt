@@ -1,0 +1,8 @@
+1. all-MiniLM-L6-v2 + UMAP + HDBScan + CountVectorizer + c-TF-IDF
+2. all-mpnet-base-v2 + UMAP + HDBScan + CountVectorizer + c-TF-IDF
+3. all-MiniLM-L6-v2 + UMAP + k-Means + CountVectorizer + c-TF-IDF
+4. all-mpnet-base-v2 + UMAP + k-Means + CountVectorizer + c-TF-IDF
+5. all-MiniLM-L6-v2 + UMAP + HDBScan + CountVectorizer + c-TF-IDF + Normalization
+6. all-mpnet-base-v2 + UMAP + HDBScan + CountVectorizer + c-TF-IDF + Normalization
+7. all-MiniLM-L6-v2 + UMAP + k-Means + CountVectorizer + c-TF-IDF + Normalization
+8. all-mpnet-base-v2 + UMAP + k-Means + CountVectorizer + c-TF-IDF + Normalization
