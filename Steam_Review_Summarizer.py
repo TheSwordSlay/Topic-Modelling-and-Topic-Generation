@@ -55,9 +55,9 @@ if uploaded_csv:
         
         dictionary, topic_model = get_topic_model_dict()
 
-        def first_n_words(string, n):
-            words = string.split()  # Split the string into words
-            return ' '.join(words[:n])
+        # def first_n_words(string, n):
+        #     words = string.split()  # Split the string into words
+        #     return ' '.join(words[:n])
 
         def create_topic_prompt(topic_model: BERTopic, topic_id: int, data_string: list, max_docs: int = 5) -> str:
             # Get document info with the original documents
@@ -74,7 +74,7 @@ if uploaded_csv:
                 selected_docs = topic_docs['Document'].tolist()[:max_docs]
             
             # Format documents as a list
-            formatted_docs = "\n".join(f"- {first_n_words(doc, 200)}" for doc in selected_docs)
+            formatted_docs = "\n".join(f"- {doc}" for doc in selected_docs)
             
             # Get keywords (top words) for the topic
             keywords = [word for word, _ in topic_model.get_topic(topic_id)]
@@ -92,7 +92,7 @@ if uploaded_csv:
 
         @st.cache_data
         def generate_topic(topic_id):  # Replace with your desired topic ID
-            prompt = create_topic_prompt(topic_model, topic_id, data_string, max_docs=10)
+            prompt = create_topic_prompt(topic_model, topic_id, data_string, max_docs=1000000000000)
 
             system_prompt_qwen2 = """<|im_start|>system
             You are a helpful, respectful and honest assistant for labeling topics.<|im_end|>"""
@@ -102,13 +102,13 @@ if uploaded_csv:
 
             prompt_qwen2 = system_prompt_qwen2 + example_prompt_qwen2
             res = generate_response(prompt_qwen2)
-            res_split = res[0]["generated_text"].replace(prompt_qwen2+"system", "").replace(prompt_qwen2+"user", "").replace(prompt_qwen2, "")
-            def strip_first_line(s):
-                lines = s.splitlines()
-                lines.pop(0)
-                return '\n'.join(lines)
-            label = strip_first_line(res_split)
-            return label
+            # res_split = res.replace(prompt_qwen2+"system", "").replace(prompt_qwen2+"user", "").replace(prompt_qwen2, "")
+            # def strip_first_line(s):
+            #     lines = s.splitlines()
+            #     lines.pop(0)
+            #     return '\n'.join(lines)
+            # label = strip_first_line(res_split)
+            return res
 
         def get_topic_documents(topic_model: BERTopic, topic_id: int, data_string: list) -> list:
             # Get document info
