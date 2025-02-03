@@ -36,7 +36,6 @@ if uploaded_csv:
         ctfidf_model = NormalizedClassTfidfTransformer()
         vectorizer_model = CountVectorizer(stop_words="english")
         umap_model = UMAP(n_neighbors=15, n_components=5, min_dist=0.0, metric='cosine', random_state=42)
-        # hdbscan_model = HDBSCAN(min_cluster_size=15, metric='euclidean', cluster_selection_method='eom', prediction_data=True)
         hdbscan_model = KMeans(n_clusters=18, random_state=42)
         topic_model = BERTopic(embedding_model="all-MiniLM-L6-v2", umap_model=umap_model, hdbscan_model=hdbscan_model, vectorizer_model=vectorizer_model, ctfidf_model=ctfidf_model, verbose=True)
         data_array = data.to_numpy()
@@ -55,23 +54,13 @@ if uploaded_csv:
         
         dictionary, topic_model = get_topic_model_dict()
 
-        # def first_n_words(string, n):
-        #     words = string.split()  # Split the string into words
-        #     return ' '.join(words[:n])
-
-        def create_topic_prompt(topic_model: BERTopic, topic_id: int, data_string: list, max_docs: int = 5) -> str:
+        def create_topic_prompt(topic_model: BERTopic, topic_id: int, data_string: list) -> str:
             # Get document info with the original documents
             doc_info = topic_model.get_document_info(data_string)
             
             # Filter for the specific topic and get top documents by probability
             topic_docs = doc_info[doc_info['Topic'] == topic_id]
-            if 'Probability' in topic_docs.columns:
-                selected_docs = topic_docs.nlargest(max_docs, 'Probability')['Document'].tolist()
-            elif 'probability' in topic_docs.columns:
-                selected_docs = topic_docs.nlargest(max_docs, 'probability')['Document'].tolist()
-            else:
-                # If no probability column, just take the first max_docs
-                selected_docs = topic_docs['Document'].tolist()[:max_docs]
+            selected_docs = topic_docs['Document'].tolist()
             
             # Format documents as a list
             formatted_docs = "\n".join(f"- {doc}" for doc in selected_docs)
@@ -91,8 +80,8 @@ if uploaded_csv:
             return prompt
 
         @st.cache_data
-        def generate_topic(topic_id):  # Replace with your desired topic ID
-            prompt = create_topic_prompt(topic_model, topic_id, data_string, max_docs=1000000000000)
+        def generate_topic(topic_id, data_review):  # Replace with your desired topic ID
+            prompt = create_topic_prompt(topic_model, topic_id, data_review)
 
             system_prompt_qwen2 = """<|im_start|>system
             You are a helpful, respectful and honest assistant for labeling topics.<|im_end|>"""
@@ -102,26 +91,17 @@ if uploaded_csv:
 
             prompt_qwen2 = system_prompt_qwen2 + example_prompt_qwen2
             res = generate_response(prompt_qwen2)
-            # res_split = res.replace(prompt_qwen2+"system", "").replace(prompt_qwen2+"user", "").replace(prompt_qwen2, "")
-            # def strip_first_line(s):
-            #     lines = s.splitlines()
-            #     lines.pop(0)
-            #     return '\n'.join(lines)
-            # label = strip_first_line(res_split)
             return res
 
         def get_topic_documents(topic_model: BERTopic, topic_id: int, data_string: list) -> list:
-            # Get document info
             doc_info = topic_model.get_document_info(data_string)
             
-            # Filter for the specific topic and get all documents
             topic_docs = doc_info[doc_info['Topic'] == topic_id]['Document'].tolist()
             
             return topic_docs
-        # Assume `model` is your trained BERTopic instance
+
         topic_info = topic_model.get_topic_info()
 
-        # Count the number of unique topics
         num_topics = topic_info.shape[0]
         array_topic_generation = ["aaa" for _ in range(num_topics + 5)]
 
@@ -129,15 +109,9 @@ if uploaded_csv:
         for i, (key, value) in enumerate(dictionary.items()):
             if i >= max_items:
                 break
-            # button_key = f"button_{i}"  # Generate a unique key for each button
-        
-            # # # Initialize the state for this button
-            # # if button_key not in st.session_state.button_states:
-            # #     st.session_state.button_states[button_key] = False 
 
             array_topic = get_topic_documents(topic_model, key, data_string)
-            # if st.button("Generate topic", key=button_key):
-            st.write("Topic : "+generate_topic(key))
+            st.write("Topic : "+generate_topic(key, data_string))
             with st.expander(f"See reviews"):
                 st.write(f"Keyphrase : {', '.join(value)}")
                 st.write("Reviews")
