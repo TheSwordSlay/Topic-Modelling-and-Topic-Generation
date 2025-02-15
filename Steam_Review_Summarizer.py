@@ -36,7 +36,7 @@ if uploaded_csv:
         ctfidf_model = NormalizedClassTfidfTransformer()
         vectorizer_model = CountVectorizer(stop_words="english")
         umap_model = UMAP(n_neighbors=15, n_components=5, min_dist=0.0, metric='cosine', random_state=42)
-        hdbscan_model = KMeans(n_clusters=18, random_state=42)
+        hdbscan_model = HDBSCAN(min_cluster_size=15, metric='euclidean', cluster_selection_method='eom', prediction_data=True)
         topic_model = BERTopic(embedding_model="all-MiniLM-L6-v2", umap_model=umap_model, hdbscan_model=hdbscan_model, vectorizer_model=vectorizer_model, ctfidf_model=ctfidf_model, verbose=True)
         data_array = data.to_numpy()
         data_string = []

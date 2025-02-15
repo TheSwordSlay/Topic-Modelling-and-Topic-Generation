@@ -1,12 +1,12 @@
 import requests
 import json
 
-OLLAMA_URL = "https://809d-34-16-218-202.ngrok-free.app/"
+OLLAMA_URL = "https://50f9-34-125-214-142.ngrok-free.app/"
 
 def generate_response(prompt):
     headers = {'Content-Type': 'application/json'}
     data = {
-        "model": "qwen2.5:1.5b",
+        "model": "qwen2.5:14b",
         "messages": [
             {
                 "role": "user",
